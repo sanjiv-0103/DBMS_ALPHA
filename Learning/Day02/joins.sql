@@ -22,4 +22,4 @@ RIGHT JOIN departments ON students.dept_id=departments.dept_id;
 -- FULL OUTER JOIN #shows all rows from both tables
 
 SELECT students.name, departments.dept_name FROM students
-FULL OUTER JOIN departments ON students.dept_id = departments.dept_id;
+FULL OUTER JOIN departments ON students.dept_id=departments.dept_id;

@@ -1,0 +1,64 @@
+
+Project Booking_Reservation_System {
+  database_type: 'PostgreSQL'
+  Note: 'Booking and reservation management with time slots'
+}
+
+Table users {
+  id integer [pk, increment]
+  full_name varchar(100) [not null]
+  email varchar(150) [unique, not null]
+  phone varchar(20)
+  created_at timestamp [default: `now()`]
+}
+
+Table services {
+  id integer [pk, increment]
+  name varchar(100) [not null]
+  description text
+  duration_minutes integer [not null]
+  price decimal(10,2) [not null]
+  is_active boolean [default: true]
+}
+
+Table resources {
+  id integer [pk, increment]
+  name varchar(100) [not null]
+  resource_type varchar(50)
+  capacity integer [default: 1]
+  is_active boolean [default: true]
+}
+
+Table time_slots {
+  id integer [pk, increment]
+  resource_id integer [not null, ref: > resources.id]
+  slot_date date [not null]
+  start_time time [not null]
+  end_time time [not null]
+  is_available boolean [default: true]
+
+  indexes {
+    (resource_id, slot_date, start_time) [unique]
+  }
+}
+
+Table reservations {
+  id integer [pk, increment]
+  user_id integer [not null, ref: > users.id]
+  service_id integer [not null, ref: > services.id]
+  time_slot_id integer [not null, ref: > time_slots.id]
+  status varchar(30) [default: 'pending']
+  total_amount decimal(10,2)
+  booked_at timestamp [default: `now()`]
+  cancelled_at timestamp
+}
+
+Table payments {
+  id integer [pk, increment]
+  reservation_id integer [not null, ref: > reservations.id]
+  amount decimal(10,2) [not null]
+  payment_method varchar(30)
+  payment_status varchar(30) [default: 'pending']
+  transaction_reference varchar(100) [unique]
+  paid_at timestamp
+}

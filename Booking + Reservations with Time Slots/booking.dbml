@@ -1,0 +1,49 @@
+Project booking_reservations {
+  database_type: 'PostgreSQL'
+  Note: 'Booking system with users, services, time slots, and reservations'
+}
+
+Table users {
+  id integer [pk, increment]
+  username varchar(30) [not null, unique]
+  email varchar(100) [not null, unique]
+  created_at timestamptz [not null, default: `CURRENT_TIMESTAMP`]
+}
+
+Table services {
+  id integer [pk, increment]
+  name varchar(100) [not null, unique]
+  description text
+  duration_minutes integer [not null, note: 'CHECK: duration_minutes > 0']
+  price numeric(10,2) [not null, note: 'CHECK: price >= 0']
+}
+
+Table time_slots {
+  id integer [pk, increment]
+  service_id integer [not null, ref: > services.id]
+  booking_date date [not null]
+  start_time time [not null]
+  end_time time [not null, note: 'CHECK: end_time > start_time']
+
+  indexes {
+    (service_id, booking_date, start_time) [unique]
+    service_id [name: 'idx_time_slots_service_id']
+    (booking_date, start_time) [name: 'idx_time_slots_date_start']
+  }
+}
+
+Table reservations {
+  id integer [pk, increment]
+  user_id integer [not null, ref: > users.id]
+  slot_id integer [not null, ref: > time_slots.id]
+  status varchar(20) [not null, default: 'BOOKED', note: 'CHECK: BOOKED, CANCELLED, COMPLETED']
+  notes varchar(500)
+  created_at timestamptz [not null, default: `CURRENT_TIMESTAMP`]
+
+  Note: 'SQL adds a partial UNIQUE index on slot_id for BOOKED or COMPLETED records. DBML cannot fully represent that condition.'
+  indexes {
+    user_id [name: 'idx_reservations_user_id']
+    slot_id [name: 'idx_reservations_slot_id']
+    status [name: 'idx_reservations_status']
+  }
+}
